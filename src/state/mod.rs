@@ -1,8 +1,11 @@
 use std::iter;
+use wgpu::util::DeviceExt;
 use winit::{
     event::*,
     window::Window
 };
+
+mod vertex;
 
 pub struct State {
     surface : wgpu::Surface,
@@ -12,7 +15,9 @@ pub struct State {
     swap_chain: wgpu::SwapChain,
     clear_color: wgpu::Color,
     render_pipeline: wgpu::RenderPipeline,
-    // spacekey_render_pipeline: wgpu::RenderPipeline,
+    vertex_buffer: wgpu::Buffer,
+    index_buffer: wgpu::Buffer,
+    num_indices: u32,
     pub size: winit::dpi::PhysicalSize<u32>
 }
 
@@ -69,6 +74,8 @@ impl State {
 
         let swap_chain = device.create_swap_chain(&surface, &sc_desc);
 
+        let clear_color = wgpu::Color::BLACK;
+
         let vs_module = device.create_shader_module(&wgpu::include_spirv!("shader.vert.spv"));
         let fs_module = device.create_shader_module(&wgpu::include_spirv!("shader.frag.spv"));
 
@@ -85,7 +92,7 @@ impl State {
             vertex: wgpu::VertexState {
                 module: &vs_module,
                 entry_point: "main",
-                buffers: &[],
+                buffers: &[vertex::Vertex::desc()]
             },
             fragment: Some(wgpu::FragmentState {
                 module: &fs_module,
@@ -112,42 +119,24 @@ impl State {
                 alpha_to_coverage_enabled: false
             },
         });
-        /*
-        let spacekey_render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("Render Pipeline"),
-            layout: Some(&render_pipeline_layout),
-            vertex: wgpu::VertexState {
-                module: &vs_module,
-                entry_point: "main",
-                buffers: &[]
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &fs_module,
-                entry_point: "main",
-                targets: &[wgpu::ColorTargetState {
-                    format: sc_desc.format,
-                    color_blend: wgpu::BlendState::REPLACE,
-                    alpha_blend: wgpu::BlendState::REPLACE,
-                    write_mask: wgpu::ColorWrite::ALL
-                }]
-            }),
-            primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleList,
-                strip_index_format : None,
-                front_face: wgpu::FrontFace::Ccw,
-                cull_mode: wgpu::CullMode::Back,
-                // Setting this to anything else than Fill requires Features::NON_FILL_POLYGON_MODE 
-                polygon_mode: wgpu::PolygonMode::Fill
-            },
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState {
-                count: 1,
-                mask: !0,
-                alpha_to_coverage_enabled: false
-            },
-        }); */
 
-        let clear_color = wgpu::Color::BLACK;
+        let vertex_buffer = device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: bytemuck::cast_slice(vertex::VERTICES),
+                usage: wgpu::BufferUsage::VERTEX,
+            }
+        );
+
+        let index_buffer = device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Index Buffer"),
+                contents: bytemuck::cast_slice(vertex::INDICES),
+                usage: wgpu::BufferUsage::INDEX,
+            }
+        );
+
+        let num_indices = vertex::INDICES.len() as u32;
 
         Self {
             surface,
@@ -157,7 +146,9 @@ impl State {
             swap_chain,
             clear_color,
             render_pipeline,
-            // spacekey_render_pipeline,
+            vertex_buffer,
+            index_buffer,
+            num_indices,
             size
         }
     }
@@ -169,6 +160,8 @@ impl State {
         self.swap_chain = self.device.create_swap_chain(&self.surface, &self.sc_desc);
     }
 
+    // TODO: change argument from event: &WindowEvent to decoded_mp3_data: &i16
+    // TODO: use decoded_mp3_data to change colors, draw shapes, etc.
     pub fn input(&mut self, event: &WindowEvent) -> bool {
         match event {
             WindowEvent::CursorMoved { position, .. } => {
@@ -189,9 +182,9 @@ impl State {
             } => { 
                     if *state != ElementState::Released {
                         self.clear_color = wgpu::Color {
-                            r: self.clear_color.g, 
-                            g: self.clear_color.r,
-                            b: 0.5,
+                            r: self.clear_color.r * self.size.width as f64, 
+                            g: self.clear_color.g * self.size.height as f64,
+                            b: 1.0,
                             a: 1.0
                         };
                     }
@@ -254,7 +247,9 @@ impl State {
         });
 
         render_pass.set_pipeline(&self.render_pipeline);
-        render_pass.draw(0..3, 0..1);
+        render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+        render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+        render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
 
         // release the mutable borrow
         // so that `finish` may be called by encoder.

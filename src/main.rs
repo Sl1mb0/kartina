@@ -34,6 +34,12 @@ fn main() {
                 ref event,
                 window_id,
             } if window_id == window.id() => {
+                // TODO: change state.input() argument to take vec<i16>;
+                // TODO: use minimp3 decoder to read decoded mp3 data 
+                // TODO: pass decoded mp3 data (16-bit signed integer) to state.input()
+                /* 
+
+                */
                 if !state.input(event) {
                     match event {
                         WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
@@ -60,7 +66,7 @@ fn main() {
                 state.update();
                 match state.render() {
                     Ok(_) => {},
-                     // Recreate the swap_chain if lost
+                    // Recreate the swap_chain if lost
                     Err(wgpu::SwapChainError::Lost) => state.resize(state.size),
                     // The system is out of memory, we should probably quit
                     Err(wgpu::SwapChainError::OutOfMemory) => *control_flow = ControlFlow::Exit,
