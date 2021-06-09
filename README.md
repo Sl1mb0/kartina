@@ -23,17 +23,15 @@ are encoded, which is why only the numerical data is used.
 
 Since the project consists of a vertex shader and a fragment shader, individual GLSL files must also be compiled when building the project. 
 To do this, I've included a build script: `build.rs` that is used to compile the shaders. This makes building and running the project much simpler.
-The build script simply compiles each shader and write the compiled shader to a specified path.
+The build script simply compiles each shader and writes the compiled shader to a specified path.
 
 # Building
 To build the project, first clone the repo. From within the cloned repo type: `cargo build`. Then, to run the project, type: `cargo run`.
 
-## Enjoy.
-
 # Testing
-All tests are stored in the `/tests` directory. All rust code in `/src/state` is tested, and I also wrote some tests for the components I used
+All tests are stored in the `/tests` directory. All rust code in `/src/state/vertex.rs` is tested, and I also wrote some tests for the components I used
 from the `minimp3` and `play` crates. `wgpu` is a well-documented crate, and there are tons of resources online about it; which is my rationale for why I chose not to test
-the `wgpu` components of this project.
+the `wgpu` components of this project; Though I did add testing for code that I wrote in `src/state/mod.rs`
 
 # Licensing
 This repo contains two licenses. The project itself is released under the _ license. The song, however, is included under the _ creative commons license. I did this to
@@ -41,5 +39,7 @@ project Andrey, as I recieved from him to use his song was via email, and very i
 The song can be released and distributed alongside the project, but all song credit must go to Andrey Pushkarev.
 
 # References
-()[]
-()[]
+(OpenGL Sphere)[]
+(Learn Wgpu)[]
+
+### Enjoy
