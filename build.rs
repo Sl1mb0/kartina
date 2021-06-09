@@ -17,7 +17,7 @@ impl ShaderData {
     pub fn load(src_path: PathBuf) -> Result<Self> {
         let extension = src_path
             .extension()
-            .context("Fle has no extension")?
+            .context("File has no extension")?
             .to_str()
             .context("Extension cannot be converted to &str")?;
         let kind = match extension {
@@ -44,7 +44,7 @@ fn main() -> Result<()> {
     let mut shader_paths = [
         glob("./src/**/*.vert")?,
         glob("./src/**/*.frag")?,
-        glob("./src/**/*.comp")?
+        glob("./src/**/*.comp")?.
     ];
 
     // This could be parallelized

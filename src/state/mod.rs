@@ -1,8 +1,8 @@
 use std::iter;
 use wgpu::util::DeviceExt;
+use minimp3::Frame;
 use winit::{
-    event::*,
-    window::Window
+    window::Window,
 };
 
 mod vertex;
@@ -22,29 +22,23 @@ pub struct State {
 }
 
 impl State {
-
     // async keyword transforms block of 
     // code into a state machine
     // that implements the `Future` trait.
     // Normally calling a Blocking function would block the whole thread
-    // blocked `Future`s will yield control of the thread to other `Future`s
-
+    //` blocked `Future`s will yield control of the thread to other `Future`s
     pub async fn new(window: &Window) -> Self {
         let size = window.inner_size();
-
         // `instance` is a handle to the GPU
-        // BackendBit::PRIMARY => Vulkan + Metal + DX12 + Browser WebGPU
-        
+        // BackendBit::PRIMARY => Vulkan + Metal + DX12 + Browser WebGPU      
         let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY);
 
         // `surface` is used to create swapchain
         // for more on swapchains: [swap chain](https://en.wikipedia.org/wiki/Swap_chain)
-
         let surface = unsafe { instance.create_surface(window) };
 
         // `adapter` is needed to create the device and queue
         // `features` field in DeviceDescriptor allows us to specify extra features
-
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
@@ -74,7 +68,7 @@ impl State {
 
         let swap_chain = device.create_swap_chain(&surface, &sc_desc);
 
-        let clear_color = wgpu::Color::BLACK;
+        let clear_color = wgpu::Color::WHITE;
 
         let vs_module = device.create_shader_module(&wgpu::include_spirv!("shader.vert.spv"));
         let fs_module = device.create_shader_module(&wgpu::include_spirv!("shader.frag.spv"));
@@ -119,24 +113,31 @@ impl State {
                 alpha_to_coverage_enabled: false
             },
         });
-
+        
+        // As it currently stands, any buffers that 
+        // are passed to the GPU to be read must be an array.
+        // the following function returns a vector for ease of use, 
+        // but the value itself must be stored as a slice.
+        // for more about this issue: (https://github.com/gfx-rs/wgpu-rs/issues/88)
+        let vb = vertex::Vertex::sphere_vertices(5.0);
         let vertex_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Vertex Buffer"),
-                contents: bytemuck::cast_slice(vertex::VERTICES),
+                contents: bytemuck::cast_slice(&vb),
                 usage: wgpu::BufferUsage::VERTEX,
             }
         );
-
+        
+        let ib = vertex::Vertex::sphere_indices();
         let index_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Index Buffer"),
-                contents: bytemuck::cast_slice(vertex::INDICES),
+                contents: bytemuck::cast_slice(&ib),
                 usage: wgpu::BufferUsage::INDEX,
             }
         );
 
-        let num_indices = vertex::INDICES.len() as u32;
+        let num_indices = ib.len() as u32;
 
         Self {
             surface,
@@ -160,38 +161,14 @@ impl State {
         self.swap_chain = self.device.create_swap_chain(&self.surface, &self.sc_desc);
     }
 
-    // TODO: change argument from event: &WindowEvent to decoded_mp3_data: &i16
-    // TODO: use decoded_mp3_data to change colors, draw shapes, etc.
-    pub fn input(&mut self, event: &WindowEvent) -> bool {
-        match event {
-            WindowEvent::CursorMoved { position, .. } => {
-                self.clear_color = wgpu::Color {
-                    r: position.x as f64 / self.size.width as f64,
-                    g: position.y as f64 / self.size.height as f64,
-                    b: 1.0,
-                    a: 1.0
-                };
-                true
-            },
-            WindowEvent::KeyboardInput { input: KeyboardInput {
-                state,
-                virtual_keycode: Some(VirtualKeyCode::Space),
-                ..
-                }, 
-            ..
-            } => { 
-                    if *state != ElementState::Released {
-                        self.clear_color = wgpu::Color {
-                            r: self.clear_color.r * self.size.width as f64, 
-                            g: self.clear_color.g * self.size.height as f64,
-                            b: 1.0,
-                            a: 1.0
-                        };
-                    }
-                    true 
-            },
-            _ => false
-        }
+    pub fn input(&mut self, frame: &Frame) -> bool {
+        self.clear_color = wgpu::Color {
+            r: 0.3 * frame.data[2] as f64 % 3.0,
+            g: 0.4 * frame.data[1] as f64 % 3.0,
+            b: 1.0,
+            a: 1.0,
+        };
+        true
     }
 
     pub fn update(&mut self) {
@@ -213,31 +190,26 @@ impl State {
         // `encoder.begin_render_pass()` borrows `encoder` mutably 
         // therefore, `encoder.finish()` cannot be called
         // until the mutable borrow is released by `encoder.begin_render_pass()
-
         let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             
             // RenderPassDescriptor has three fields: `label`, `color_attachment`, and `depth_stencil_attachment`
             // color_attachments describes where color will be drawn to
-
             label: Some("Render Pass"),
             color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
                 
                 // `attachment` informs wgpu what textures to save the colors to
                 // in this case, we have specified frame.view 
                 // (that was created with swap_chain.get_current_frame())
-                // esentially any colors drawn to this attachment will be drawn to the screen
-                
+                // esentially any colors drawn to this attachment will be drawn to the screen              
                 attachment: &frame.view,
                 
                 // `resolve_target` is the texture that will receive the resolved output
                 // This will be the same as `attachment` unless multisampling is enabled
-
                 resolve_target: None,
 
                 // `ops` takes a `wgpu::Operations` object. this tells wgpu
                 // what to do with the colors on the screen (specified by frame.view) 
                 // `load` tells wgpu how to handle colors stored from the previous frame
-
                 ops: wgpu::Operations { 
                     load: wgpu::LoadOp::Clear(self.clear_color),
                     store: true
