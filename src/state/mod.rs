@@ -132,30 +132,25 @@ impl State {
             },
         });
         
-        // As it currently stands, any buffers that 
-        // are passed to the GPU to be read must be an array.
-        // the following function returns a vector for ease of use, 
-        // but the value itself must be stored as a slice.
-        // for more about this issue: (https://github.com/gfx-rs/wgpu-rs/issues/88)
-        let vb = vertex::Vertex::sphere_vertices(5.0);
+        let vbo = vertex::Vertex::sphere_vertices(1.0);
         let vertex_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Vertex Buffer"),
-                contents: bytemuck::cast_slice(&vb),
+                contents: bytemuck::cast_slice(&vbo),
                 usage: wgpu::BufferUsage::VERTEX,
             }
         );
         
-        let ib = vertex::Vertex::sphere_indices();
+        let ibo = vertex::Vertex::sphere_indices();
         let index_buffer = device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Index Buffer"),
-                contents: bytemuck::cast_slice(&ib),
+                contents: bytemuck::cast_slice(&ibo),
                 usage: wgpu::BufferUsage::INDEX,
             }
         );
 
-        let num_indices = ib.len() as u32;
+        let num_indices = ibo.len() as u32;
 
         Self {
             surface,
@@ -180,12 +175,23 @@ impl State {
     }
 
     pub fn input(&mut self, frame: &Frame) -> bool {
-        self.clear_color = wgpu::Color {
-            r: 0.3 * frame.data[2] as f64 % 3.0,
-            g: 0.4 * frame.data[1] as f64 % 3.0,
-            b: 1.0,
-            a: 1.0,
-        };
+        let mut vertices = vertex::Vertex::sphere_vertices(1.0);
+        for vertex in &mut vertices {
+            let colors = [
+                vertex.position[0] * frame.data[2] as f32 % 256.0,
+                vertex.position[1] + frame.data[1] as f32 % 256.0,
+                vertex.position[2] / frame.data[0] as f32 % 256.0,
+            ];
+            vertex.change_color(colors);
+        }
+
+        self.vertex_buffer = self.device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: bytemuck::cast_slice(&vertices),
+                usage: wgpu::BufferUsage::VERTEX,
+            }
+        );
         true
     }
 
