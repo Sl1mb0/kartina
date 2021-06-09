@@ -1,8 +1,8 @@
 ``` 
- _  _    __    ____  ____  ____  ____  _  _    __   
-( )/ )  /__\  (  _ \(_  _)(  _ \(_  _)( \( )  /__\  
- )  (  /(__)\  )   /  )(   )   / _)(_  )  (  /(__)\ 
-(_)\_)(__)(__)(_)\_) (__) (_)\_)(____)(_)\_)(__)(__)
+ _  _    __    ____  ____  ____  _  _    __   
+( )/ )  /__\  (  _ \(_  _)(_  _)( \( )  /__\  
+ )  (  /(__)\  )   /  )(   _)(_  )  (  /(__)\ 
+(_)\_)(__)(__)(_)\_) (__) (____)(_)\_)(__)(__)
 
 ```
 
@@ -25,9 +25,10 @@ Since the project consists of a vertex shader and a fragment shader, individual 
 To do this, I've included a build script: `build.rs` that is used to compile the shaders. This makes building and running the project much simpler.
 The build script simply compiles each shader and write the compiled shader to a specified path.
 
-# Building:
+# Building
 To build the project, first clone the repo. From within the cloned repo type: `cargo build`. Then, to run the project, type: `cargo run`.
-Enjoy.
+
+## Enjoy.
 
 # Testing
 All tests are stored in the `/tests` directory. All rust code in `/src/state` is tested, and I also wrote some tests for the components I used
