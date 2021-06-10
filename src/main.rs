@@ -37,7 +37,7 @@ mod state;
 fn main() {
     thread::spawn(|| {
         // child thread
-        play::play("./song/Can I Take A Picture With You.mp3").unwrap();
+        play::play("./song/Can I Take A Picture With You-short.mp3").unwrap();
         thread::sleep(Duration::from_millis(1));
     });
     // parent thread
