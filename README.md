@@ -48,7 +48,7 @@ The song can be released and distributed alongside the project, but all song cre
 ![Alt text](./kartina-screenshot.jpg?raw=true "Kartina")
 
 # References
-[OpenGL Sphere](http://www.songho.ca/opengl/gl_sphere.html#sphere)
-[Learn Wgpu](https://sotrh.github.io/learn-wgpu/#what-is-wgpu)
+[OpenGL Sphere](http://www.songho.ca/opengl/gl_sphere.html#sphere)  
+[Learn Wgpu](https://sotrh.github.io/learn-wgpu/#what-is-wgpu)  
 
 ### Enjoy
