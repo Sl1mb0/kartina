@@ -1,4 +1,4 @@
-/*    
+/*
 Kartina is a GPU shader that renders a sphere colored using decoded mp3 frame data.
 Copyright (C) 2021 Timothy Maloney
 
@@ -16,24 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use minimp3::{
-    Decoder,
-    Error,
-};
-use std::{
-    thread, 
-    fs::File,
-    time::Duration,
-};
+use minimp3::{Decoder, Error};
+use std::{fs::File, thread, time::Duration};
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
-    window::{WindowBuilder},
+    window::WindowBuilder,
 };
 
 mod state;
 
-/// todo!()
+/// This is the `main` method. Two threads are spawned:
+/// One to play the song in the background,
+/// and another to open the window and handle the rendering.
 fn main() {
     thread::spawn(|| {
         // child thread
@@ -54,9 +49,11 @@ fn main() {
 
     event_loop.run(move |event, _, control_flow| {
         match decoder.next_frame() {
-            Ok(frame) => { state.input(&frame); },
+            Ok(frame) => {
+                state.input(&frame);
+            }
             // The song is over, let's close the window
-            Err(Error::Eof) => { *control_flow = ControlFlow::Exit },
+            Err(Error::Eof) => *control_flow = ControlFlow::Exit,
             Err(e) => panic!("{:?}", e),
         }
         match event {
@@ -64,30 +61,32 @@ fn main() {
                 ref event,
                 window_id,
             } if window_id == window.id() => {
-                 match event {
+                match event {
                     WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                    // this match pattern yields a cargo clippy error, though making the suggested
+                    // fix does not work.
                     WindowEvent::KeyboardInput { input, .. } => match input {
                         KeyboardInput {
                             state: ElementState::Pressed,
                             virtual_keycode: Some(VirtualKeyCode::Escape),
                             ..
                         } => *control_flow = ControlFlow::Exit,
-                        _ => {},
+                        _ => {}
                     },
                     WindowEvent::Resized(physical_size) => {
-                            state.resize(*physical_size);
-                        },
-                    WindowEvent::ScaleFactorChanged {new_inner_size, .. } => {
+                        state.resize(*physical_size);
+                    }
+                    WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                         // `new_inner_size` is &&mut so it must be dereferenced twice
                         state.resize(**new_inner_size);
                     }
-                    _ => {},
+                    _ => {}
                 }
             }
             Event::RedrawRequested(_) => {
                 state.update();
                 match state.render() {
-                    Ok(_) => {},
+                    Ok(_) => {}
                     // Recreate the swap_chain if lost
                     Err(wgpu::SwapChainError::Lost) => state.resize(state.size),
                     // The system is out of memory, we should probably quit
