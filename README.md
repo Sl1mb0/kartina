@@ -34,9 +34,10 @@ trying to get a feel for something, and this time could have been better spent i
 To build the project, first clone the repo. From within the cloned repo type: `cargo build`. Then, to run the project, type: `cargo run`.
 
 # Testing
-All tests are stored in the `/tests` directory. All rust code in `/src/state/vertex.rs` is tested, and I also wrote some tests for the components I used
-from the `minimp3` and `play` crates. `wgpu` is a well-documented crate, and there are tons of resources online about it; which is my rationale for why I chose not to test
-the `wgpu` components of this project; Though I did add testing for code that I wrote in `src/state/mod.rs`
+I included unit-testing for the `Camera` and `Vertex` modules. The majority of the code found in `/src/main.rs` and `/src/state/mod.rs` is dependent on libraries 
+that are well-documented. Testing these libraries was not in the scope of this project, so I elected against including testing in those files, as the project working 
+correctly is an indicator (though not an absolute one) that those libraries are working as intended. I've also included some doc-examples where appropriate, mainly
+for my own personal use.
 
 # Licensing
 This repo contains two licenses. The project itself is released under the _ license. The song, however, is included under the _ creative commons license. I did this to
