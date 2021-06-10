@@ -25,6 +25,11 @@ Since the project consists of a vertex shader and a fragment shader, individual 
 To do this, I've included a build script: `build.rs` that is used to compile the shaders. This makes building and running the project much simpler.
 The build script simply compiles each shader and writes the compiled shader to a specified path.
 
+# Improvements
+One of the things I really wanted to add was a depth texture, so that the image I rendered would actually look 3 dimensional. As it stands, there really is no depth. 
+Something I would have done differently is coming up with the image I want to actually create much more early on. I found myself playing around with different crates
+trying to get a feel for something, and this time could have been better spent in my opinion. Hindsight is 20/20 though.
+
 # Building
 To build the project, first clone the repo. From within the cloned repo type: `cargo build`. Then, to run the project, type: `cargo run`.
 
@@ -38,8 +43,12 @@ This repo contains two licenses. The project itself is released under the _ lice
 project Andrey, as I recieved from him to use his song was via email, and very informal. The project may be released, modified, distributed, and credited to whomever. 
 The song can be released and distributed alongside the project, but all song credit must go to Andrey Pushkarev.
 
+# Preview
+
+![Alt text](./kartina-screenshot.jpg?raw=true "Kartina")
+
 # References
-(OpenGL Sphere)[]
-(Learn Wgpu)[]
+(OpenGL Sphere)[http://www.songho.ca/opengl/gl_sphere.html#sphere]
+(Learn Wgpu)[https://sotrh.github.io/learn-wgpu/#what-is-wgpu]
 
 ### Enjoy
