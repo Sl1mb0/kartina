@@ -62,7 +62,7 @@ fn main() -> Result<()> {
     let mut shader_paths = [
         glob("./src/**/*.vert")?,
         glob("./src/**/*.frag")?,
-        glob("./src/**/*.comp")?.
+        glob("./src/**/*.comp")?,
     ];
 
     // This could be parallelized
@@ -97,6 +97,5 @@ fn main() -> Result<()> {
         )?;
         write(shader.spv_path, compiled.as_binary_u8())?;
     }
-
     Ok(())
 }
