@@ -41,7 +41,7 @@ for my own personal use.
 
 # Licensing
 This repo contains two licenses. The project itself is released under the GPL-3.0 license.   
-The song, however, is included under the CC-BY-NC-DD creative commons license. I did this to project Andrey, as the permission I recieved from him to use his song was via email, and very informal. The project may be released, modified, distributed, and credited to whomever; The song can be released and distributed alongside the project, but cannot
+The song, however, is included under the CC-BY-NC-DD creative commons license. I did this to protect Andrey, as the permission I recieved from him to use his song was via email, and very informal. The project may be released, modified, distributed, and credited to whomever; The song can be released and distributed alongside the project, but cannot
 be modified, and all song credit must go to Andrey Pushkarev.
 
 # Preview
